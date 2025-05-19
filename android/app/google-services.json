@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "435777894899",
+    "project_id": "travel-app-fda29",
+    "storage_bucket": "travel-app-fda29.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435777894899:android:5c8b6efac1d26adc753a86",
+        "android_client_info": {
+          "package_name": "com.example.tour_mate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMZP2wB1U9l3qUdbO3XgF0enk4ilOuIrw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
