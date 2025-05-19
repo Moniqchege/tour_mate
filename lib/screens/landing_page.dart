@@ -14,6 +14,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
   bool isLoading = true;
   String country = '';
   double? maxCost;
+  Set<String> favoriteIds = {};
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -39,7 +40,6 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
 
   Future<void> fetchDestinations({String? country, double? maxCost}) async {
     setState(() => isLoading = true);
-
     try {
       final results = await DestinationService.fetchPopularDestinations();
       List<Destination> filtered = results;
@@ -114,22 +114,48 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
               itemCount: destinations.length,
-              itemBuilder: (context, index) => FadeTransition(
-                opacity: _fadeAnimation,
-                child: DestinationCard(
-                  destination: destinations[index],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => DestinationDetailPage(
-                          destination: destinations[index],
+              itemBuilder: (context, index) {
+                final destination = destinations[index];
+                final isFavorite = favoriteIds.contains(destination.id);
+                return Stack(
+                  children: [
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: DestinationCard(
+                        destination: destination,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DestinationDetailPage(destination: destination),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (isFavorite) {
+                              favoriteIds.remove(destination.id);
+                            } else {
+                              favoriteIds.add(destination.id);
+                            }
+                          });
+                        },
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.grey,
+                          size: 28,
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
