@@ -9,37 +9,39 @@ class DestinationService {
     'X-RapidAPI-Host': 'travel-advisor.p.rapidapi.com',
   };
 
-  // Fetch popular destinations (example: search "destinations" like Nairobi)
+  // Fetch popular destinations by using a known location like 'Nairobi'
   static Future<List<Destination>> fetchPopularDestinations() async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/locations/search?query=popular&limit=10'),
+      Uri.parse('$_baseUrl/locations/search?query=Nairobi&limit=10&lang=en_US&units=km&currency=USD'),
       headers: _headers,
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final List<dynamic> results = data['data'] ?? [];
+
       return results
+          .where((item) => item['result_type'] == 'geos')
           .map((item) => Destination.fromTravelAdvisor(item))
-          .where((d) => d != null)
-          .cast<Destination>()
           .toList();
     } else {
       throw Exception('Failed to load destinations');
     }
   }
 
-  // Fetch destinations filtered by country name (e.g. "Kenya")
+  // Search destinations by country name (e.g., "Kenya")
   static Future<List<Destination>> searchDestinations(String country) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/locations/search?query=$country&limit=10'),
+      Uri.parse('$_baseUrl/locations/search?query=$country&limit=10&lang=en_US&units=km&currency=USD'),
       headers: _headers,
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final List<dynamic> results = data['data'] ?? [];
+
       return results
+          .where((item) => item['result_type'] == 'geos')
           .map((item) {
         try {
           return Destination.fromTravelAdvisor(item);
