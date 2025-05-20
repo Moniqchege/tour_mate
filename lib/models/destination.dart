@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
 
 class Destination {
   final String id;
@@ -18,23 +20,15 @@ class Destination {
     required this.rating,
   });
 
-  factory Destination.fromTravelAdvisor(Map<String, dynamic> json) {
-    if (json['result_type'] != 'geos') {
-      throw FormatException('Unsupported result type: ${json['result_type']}');
-    }
-
-    final result = json['result_object'];
-
+  factory Destination.fromGeoapify(Map<String, dynamic> json) {
     return Destination(
-      id: result['location_id'] ?? '',
-      name: result['name'] ?? '',
-      country: result['address_obj']?['country'] ?? '',
-      description: result['location_string'] ?? '',
-      imageUrl: result['photo']?['images']?['large']?['url'] ??
-          'https://source.unsplash.com/400x300/?travel',
-      cost: 1000, // Placeholder
-      rating: double.tryParse(result['rating'] ?? '4.0') ?? 4.0,
+      id: json['properties']['place_id']?.toString() ?? UniqueKey().toString(),
+      name: json['properties']['name'] ?? 'Unknown Attraction',
+      description: json['properties']['formatted'] ?? 'No description available',
+      country: json['properties']['country'] ?? 'Unknown',
+      imageUrl: 'https://source.unsplash.com/400x300/?${json['properties']['name']?.replaceAll(' ', '+') ?? 'travel'}',
+      cost: (Random().nextDouble() * 4900) + 100,
+      rating: (Random().nextDouble() * 4) + 1,
     );
   }
-
 }
