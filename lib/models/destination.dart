@@ -1,34 +1,23 @@
-import 'package:flutter/material.dart';
-import 'dart:math';
-
 class Destination {
   final String id;
   final String name;
-  final String description;
+  final String city;
   final String country;
-  final String imageUrl;
-  final double cost;
+  final String description;
   final double rating;
+  final String imageUrl;
+  final List<String> hotels;
+  final List<String> restaurants;
 
   Destination({
     required this.id,
     required this.name,
-    required this.description,
+    required this.city,
     required this.country,
-    required this.imageUrl,
-    required this.cost,
+    required this.description,
     required this.rating,
+    required this.imageUrl,
+    required this.hotels,
+    required this.restaurants,
   });
-
-  factory Destination.fromGeoapify(Map<String, dynamic> json) {
-    return Destination(
-      id: json['properties']['place_id']?.toString() ?? UniqueKey().toString(),
-      name: json['properties']['name'] ?? 'Unknown Attraction',
-      description: json['properties']['formatted'] ?? 'No description available',
-      country: json['properties']['country'] ?? 'Unknown',
-      imageUrl: 'https://source.unsplash.com/400x300/?${json['properties']['name']?.replaceAll(' ', '+') ?? 'travel'}',
-      cost: (Random().nextDouble() * 4900) + 100,
-      rating: (Random().nextDouble() * 4) + 1,
-    );
-  }
 }
