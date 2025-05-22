@@ -8,6 +8,8 @@ class Destination {
   final String imageUrl;
   final List<String> hotels;
   final List<String> restaurants;
+  final double? latitude;
+  final double? longitude;
 
   Destination({
     required this.id,
@@ -19,5 +21,7 @@ class Destination {
     required this.imageUrl,
     required this.hotels,
     required this.restaurants,
+    this.latitude,
+    this.longitude,
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -6,9 +7,11 @@ class ApiService {
   static const String _amadeusApiKey = '9SpiQNBUAeSa01JYVArZcGSGfa61UOUG';
   static const String _amadeusApiSecret = 'xirsymcWKcWdIx7o';
   static const String _travelAdvisorBaseUrl = 'https://travel-advisor.p.rapidapi.com';
-  static const String _rapidApiKey = '43ffd2491dmsh415142f0db4aec1p1b9cefjsnb883494b853c'; // Replace with your RapidAPI key
+  static const String _rapidApiKey = '43ffd2491dmsh415142f0db4aec1p1b9cefjsnb883494b853c'; // Replace with your Travel Advisor RapidAPI key
   static const String _rapidApiHost = 'travel-advisor.p.rapidapi.com';
-  static const String _googlePlacesApiKey = 'YOUR_GOOGLE_API_KEY'; // Replace with your Google API key
+  static const String _googleMapsBaseUrl = 'https://google-api31.p.rapidapi.com/map';
+  static const String _googleMapsRapidApiKey = '43ffd2491dmsh415142f0db4aec1p1b9cefjsnb883494b853c';
+  static const String _googleMapsRapidApiHost = 'google-api31.p.rapidapi.com';
   static String? _amadeusAccessToken;
 
   Future<String> _getAmadeusAccessToken() async {
@@ -40,19 +43,82 @@ class ApiService {
     throw Exception('Failed to fetch destinations from Travel Advisor');
   }
 
-  Future<String?> getPlacePhoto(String placeName) async {
-    final response = await http.get(
-      Uri.parse('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=photos&key=$_googlePlacesApiKey'),
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final photoReference = data['candidates']?[0]?['photos']?[0]?['photo_reference'];
-      if (photoReference != null) {
-        return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$_googlePlacesApiKey';
+  Future<Map<String, dynamic>?> getPlaceCoordinates(String name, String city) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_googleMapsBaseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RapidAPI-Key': _googleMapsRapidApiKey,
+          'X-RapidAPI-Host': _googleMapsRapidApiHost,
+        },
+        body: jsonEncode({
+          'text': name,
+          'place': city,
+          'street': '',
+          'city': '',
+          'country': '',
+          'state': '',
+          'postalcode': '',
+          'latitude': '',
+          'longitude': '',
+          'radius': '',
+        }),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'latitude': double.tryParse(data['latitude']?.toString() ?? ''),
+          'longitude': double.tryParse(data['longitude']?.toString() ?? ''),
+        };
       }
+      return null;
+    } catch (e) {
+      debugPrint('Failed to fetch coordinates: $e');
+      return null;
     }
-    return null;
   }
+
+// Optional: Autocomplete API (uncomment to enable)
+/*
+  Future<List<dynamic>> getPlaceSuggestions(String input, String city) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://google-map-places-new-v2.p.rapidapi.com/v1/places:autocomplete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-FieldMask': '*',
+          'X-RapidAPI-Key': _googleMapsRapidApiKey,
+          'X-RapidAPI-Host': 'google-map-places-new-v2.p.rapidapi.com',
+        },
+        body: jsonEncode({
+          'input': input,
+          'locationBias': {
+            'circle': {
+              'center': {'latitude': 0, 'longitude': 0}, // Update with city coordinates if known
+              'radius': 10000,
+            },
+          },
+          'includedPrimaryTypes': [],
+          'includedRegionCodes': [],
+          'languageCode': '',
+          'regionCode': '',
+          'origin': {'latitude': 0, 'longitude': 0},
+          'inputOffset': 0,
+          'includeQueryPredictions': true,
+          'sessionToken': '', // Generate unique sessionToken per session
+        }),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['suggestions'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Failed to fetch place suggestions: $e');
+      return [];
+    }
+  }
+  */
 
   Future<List<dynamic>> getFlights(String origin, String destination) async {
     final token = await _getAmadeusAccessToken();
